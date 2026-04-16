@@ -1,0 +1,8 @@
+{
+  "name": "Heaven",
+  "description": "Découvrez et suivez vos paroisses avec Heaven. Programmes, messes et événements en un clic.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
