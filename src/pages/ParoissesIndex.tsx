@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { usePublicApi, type Paroisse } from '../hooks/usePublicApi';
 import { useGeolocation } from '../hooks/useGeolocation';
 import ParoisseCard from '../components/ui/ParoisseCard';
-import { Search, SlidersHorizontal, MapPin } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Search, SlidersHorizontal, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+const ITEMS_PER_PAGE = 12;
 
 export default function ParoissesIndex() {
   const { getParoisses } = usePublicApi();
@@ -12,9 +14,13 @@ export default function ParoissesIndex() {
   const [filtered, setFiltered] = useState<Paroisse[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetch = async () => {
+      setLoading(true);
       const data = await getParoisses(location || undefined);
       setParoisses(data);
       setFiltered(data);
@@ -27,10 +33,22 @@ export default function ParoissesIndex() {
     const res = paroisses.filter(
       (p) =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.city.toLowerCase().includes(search.toLowerCase())
+        p.city.toLowerCase().includes(search.toLowerCase()) ||
+        (p.district && p.district.toLowerCase().includes(search.toLowerCase()))
     );
     setFiltered(res);
+    setCurrentPage(1); // Reset to first page on search
   }, [search, paroisses]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="bg-[#FAF8F3] min-h-screen">
@@ -107,41 +125,92 @@ export default function ParoissesIndex() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
         {/* Count */}
         {!loading && (
-          <p
-            className="text-[#6B6454] text-[14px] mb-8 italic"
-            style={{ fontFamily: "'Crimson Pro', Georgia, serif" }}
-          >
-            {filtered.length} paroisse{filtered.length !== 1 ? 's' : ''} trouvée{filtered.length !== 1 ? 's' : ''}
-          </p>
+          <div className="flex justify-between items-center mb-8">
+            <p
+              className="text-[#6B6454] text-[14px] italic"
+              style={{ fontFamily: "'Crimson Pro', Georgia, serif" }}
+            >
+              Exécution de la recherche : {filtered.length} paroisse{filtered.length !== 1 ? 's' : ''} trouvée{filtered.length !== 1 ? 's' : ''}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-[#6B6454] text-[12px] font-medium uppercase tracking-widest">
+                Page {currentPage} sur {totalPages}
+              </p>
+            )}
+          </div>
         )}
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="h-64 bg-[#F2EDE3] animate-pulse" style={{ borderRadius: '2px' }} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {filtered.map((p, i) => (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-              >
-                <ParoisseCard paroisse={p} />
-                {p.distance && (
-                  <div
-                    className="mt-2 flex items-center gap-1.5 text-[12px] text-[#C9A84C]"
-                    style={{ fontFamily: "'Crimson Pro', Georgia, serif", fontWeight: 600 }}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <AnimatePresence mode="wait">
+                {paginatedItems.map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex flex-col"
                   >
-                    <MapPin className="w-3 h-3" />À {p.distance.toFixed(1)} km
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
+                    <ParoisseCard paroisse={p} />
+                    {p.distance && (
+                      <div
+                        className="mt-2 flex items-center gap-1.5 text-[12px] text-[#C9A84C]"
+                        style={{ fontFamily: "'Crimson Pro', Georgia, serif", fontWeight: 600 }}
+                      >
+                        <MapPin className="w-3 h-3" />À {p.distance.toFixed(1)} km
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-16 flex justify-center items-center gap-2">
+                <button
+                  onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="p-3 border border-[#DDD5C0] text-[#6B6454] hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`min-w-[44px] h-[44px] flex items-center justify-center text-sm font-bold transition-all ${
+                        currentPage === page
+                          ? 'bg-[#1A1A2E] text-white border-[#1A1A2E]'
+                          : 'bg-transparent text-[#6B6454] border border-[#DDD5C0] hover:border-[#C9A84C]'
+                      }`}
+                      style={{ fontFamily: "'Crimson Pro', Georgia, serif" }}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-3 border border-[#DDD5C0] text-[#6B6454] hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {!loading && filtered.length === 0 && (

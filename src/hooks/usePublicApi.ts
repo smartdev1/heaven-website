@@ -21,9 +21,6 @@ export interface Programme {
   description: string;
 }
 
-const [currentPage, setCurrentPage] = useState(1);
-const ITEMS_PER_PAGE = 12;
-
 const MOCK_PAROISSES: Paroisse[] = [
   // ── COCODY (Archidiocèse d'Abidjan) ──────────────────────────────────────
   {
@@ -373,8 +370,6 @@ const MOCK_PROGRAMMES: Programme[] = [
   { id: '123', title: 'Soirée de Louange', type: 'evenement', paroisseId: '29', paroisseName: 'Sainte Marie Mère de Dieu (Aliodan)', date: today, time: '18:00', description: 'Soirée de louange et d\'intercession organisée par le mouvement charismatique.' },
   { id: '124', title: 'Annonce : Préparation au Mariage', type: 'annonce', paroisseId: '30', paroisseName: 'Notre Dame de Cana (Agnissankoi)', date: today, time: '00:00', description: 'Nouvelle session de préparation au mariage. Inscriptions dès aujourd\'hui au secrétariat.' },
 ];
-
-
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371; // km

@@ -91,7 +91,7 @@ export default function HeroSection() {
                 placeholder="Rechercher une ville ou une paroisse..."
                 className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-[#6B6454] text-[16px] py-4"
                 style={{ fontFamily: "'Crimson Pro', Georgia, serif" }}
-                defaultValue="Paris, 75005"
+                defaultValue="Paroisse Saint Joseph, Abidjan"
               />
             </div>
             <button
@@ -113,7 +113,7 @@ export default function HeroSection() {
             transition={{ delay: 0.5 }}
             className="flex flex-wrap gap-6 mt-8"
           >
-            {['Notre-Dame de Paris', 'Saint-Sulpice', 'Sacré-Cœur'].map((name) => (
+            {['Cathédrale Notre Dame', 'Sanctuaire Marial', 'Sacré-Cœur'].map((name) => (
               <button
                 key={name}
                 className="flex items-center gap-1.5 text-[#B8B0A0] hover:text-[#C9A84C] text-[14px] transition-colors"
