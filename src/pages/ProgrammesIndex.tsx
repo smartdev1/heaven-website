@@ -12,7 +12,7 @@ export default function ProgrammesIndex() {
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [paroisses, setParoisses] = useState<Paroisse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState('2023-10-22');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [selectedParoisse, setSelectedParoisse] = useState('all');
   const [activeTab, setActiveTab] = useState('Tous');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
